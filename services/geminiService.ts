@@ -5,15 +5,22 @@ import { MASTER_STYLE_PROMPT, SYSTEM_INSTRUCTION_STORY_ANALYSIS } from "../const
 let ai: GoogleGenAI | null = null;
 
 export const hasApiKey = (): boolean => {
-  return !!process.env.API_KEY;
+  const apiKey = typeof window !== 'undefined' 
+    ? localStorage.getItem('GEMINI_API_KEY') || process.env.API_KEY
+    : process.env.API_KEY;
+  return !!apiKey;
 };
 
 const getAi = (): GoogleGenAI => {
-  if (!process.env.API_KEY) {
-    throw new Error("API Key가 설정되지 않았습니다. .env 파일을 확인해주세요.");
+  const apiKey = typeof window !== 'undefined' 
+    ? localStorage.getItem('GEMINI_API_KEY') || process.env.API_KEY
+    : process.env.API_KEY;
+    
+  if (!apiKey) {
+    throw new Error("API Key가 설정되지 않았습니다. 입력창에서 설정해주세요.");
   }
   if (!ai) {
-    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    ai = new GoogleGenAI({ apiKey });
   }
   return ai;
 };

@@ -9,6 +9,7 @@ const App: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "1:1" | "9:16">("16:9");
   const [isApiKeyMissing, setIsApiKeyMissing] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState('');
   
   // Loading State
   const [loadingState, setLoadingState] = useState<LoadingState>({ status: 'idle' });
@@ -193,6 +194,15 @@ const App: React.FC = () => {
     if (img.status === 'success') {
         const filename = `yadam_${img.id}.png`;
         downloadImage(img.imageUrl, filename);
+    }
+  };
+
+  const handleSetApiKey = () => {
+    if (tempApiKey.trim()) {
+      localStorage.setItem('GEMINI_API_KEY', tempApiKey.trim());
+      setIsApiKeyMissing(false);
+      setTempApiKey('');
+      window.location.reload();
     }
   };
 
@@ -476,18 +486,24 @@ const App: React.FC = () => {
                              <div className="border border-indigo-500/30 bg-[#151725] rounded-xl p-6 mb-6 relative">
                                  <div className="absolute -top-3 left-4 bg-[#1a1c29] px-2 text-indigo-400 text-sm font-bold flex items-center gap-1">
                                      <span className="bg-indigo-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">1</span>
-                                     환경 변수 설정
+                                     API 키 입력
                                  </div>
                                  <p className="text-slate-400 text-sm mb-4">
-                                     프로젝트 최상위 폴더에 <code className="text-white bg-slate-700 px-1 rounded">.env</code> 파일을 생성하고 키를 입력하세요.
+                                     아래에 Gemini API 키를 입력하세요. (로컬 저장소에만 저장됩니다)
                                  </p>
                                  <div className="flex gap-2">
-                                     <code className="flex-1 bg-black/50 text-emerald-400 p-3 rounded-lg font-mono text-sm border border-slate-700 break-all">
-                                         API_KEY=AIzaSy...
-                                     </code>
+                                     <input 
+                                        type="password"
+                                        value={tempApiKey}
+                                        onChange={(e) => setTempApiKey(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleSetApiKey()}
+                                        placeholder="AIzaSy..."
+                                        className="flex-1 bg-black/50 text-white p-3 rounded-lg font-mono text-sm border border-slate-700 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                     />
                                      <button 
-                                        onClick={() => window.location.reload()}
-                                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 rounded-lg font-bold shrink-0 transition-colors"
+                                        onClick={handleSetApiKey}
+                                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 rounded-lg font-bold shrink-0 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={!tempApiKey.trim()}
                                      >
                                          확인
                                      </button>
@@ -501,8 +517,8 @@ const App: React.FC = () => {
                                      <div>
                                          <p className="text-amber-500 font-bold text-sm mb-1">보안 안내</p>
                                          <ul className="text-slate-400 text-xs space-y-1 list-disc list-inside">
-                                             <li>API 키는 서버 환경 변수로 안전하게 관리되어야 합니다.</li>
-                                             <li>브라우저나 소스 코드에 직접 입력하지 마세요.</li>
+                                             <li>API 키는 브라우저의 로컬 저장소에만 저장됩니다.</li>
+                                             <li>다른 사람과 API 키를 공유하지 마세요.</li>
                                              <li>키가 유출된 경우 즉시 Google AI Studio에서 재발급 받으세요.</li>
                                          </ul>
                                      </div>
